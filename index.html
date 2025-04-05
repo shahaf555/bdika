@@ -82,11 +82,19 @@
         .tableau-container {
             position: relative;
             width: 100%;
-            height: 600px;
-            overflow: hidden;
+            height: 800px; /* Increased height to accommodate larger dashboards */
+            overflow: auto; /* Changed to auto to allow scrolling if needed */
             border-radius: 10px;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
             animation: popIn 1s ease-in-out;
+        }
+
+        .tableau-error {
+            display: none;
+            text-align: center;
+            color: #ff6b6b;
+            font-size: 1.2em;
+            padding: 20px;
         }
 
         /* Fun Button */
@@ -128,6 +136,7 @@
             .container { padding: 20px; }
             h1 { font-size: 2em; }
             h2 { font-size: 1.5em; }
+            .tableau-container { height: 500px; } /* Adjust height for mobile */
         }
     </style>
 </head>
@@ -153,22 +162,11 @@
         <div class="section" id="tableau">
             <h2>Tableau Analytics Dashboard 📊</h2>
             <p>Explore our interactive Tableau visualization below! Zoom, filter, and play with the data to uncover hidden gems! 💎</p>
-            <div class="tableau-container">
-                <div id="tableauViz"></ autotableau>
-                <script type='text/javascript' src='https://public.tableau.com/javascripts/api/tableau-2.min.js'></script>
-                <script type='text/javascript'>
-                    function initViz() {
-                        var containerDiv = document.getElementById("tableauViz");
-                        var vizUrl = "https://public.tableau.com/views/social2_17431459840100/Dashboard2?:language=en-US&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link";
-                        var options = {
-                            width: "100%",
-                            height: "100%",
-                            hideTabs: true,
-                            hideToolbar: true,
-                        };
-                        var viz = new tableau.Viz(containerDiv, vizUrl, options);
-                    }
-                </script>
+            <div class="tableau-container" id="tableauContainer">
+                <div id="tableauViz"></div>
+                <div class="tableau-error" id="tableauError">
+                    Oops! The Tableau dashboard failed to load. Please try refreshing the page or check your internet connection. 😢
+                </div>
             </div>
         </div>
 
@@ -185,7 +183,31 @@
         </div>
     </div>
 
+    <script type='text/javascript' src='https://public.tableau.com/javascripts/api/tableau-2.min.js'></script>
     <script>
+        // Load Tableau Viz with Error Handling
+        function initViz() {
+            var containerDiv = document.getElementById("tableauViz");
+            var errorDiv = document.getElementById("tableauError");
+            var vizUrl = "https://public.tableau.com/views/social2_17431459840100/Dashboard2?:language=en-US&:display_count=n&:origin=viz_share_link";
+            var options = {
+                width: "100%",
+                height: "100%",
+                hideTabs: true,
+                hideToolbar: true,
+                onFirstInteractive: function () {
+                    console.log("Tableau dashboard loaded successfully!");
+                }
+            };
+
+            try {
+                var viz = new tableau.Viz(containerDiv, vizUrl, options);
+            } catch (error) {
+                console.error("Error loading Tableau dashboard:", error);
+                errorDiv.style.display = "block";
+            }
+        }
+
         // Load Tableau Viz on page load
         window.onload = function() {
             initViz();
